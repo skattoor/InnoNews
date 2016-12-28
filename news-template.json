@@ -1,0 +1,25 @@
+{
+	"template" : "news-*",
+	"settings": {
+		"number_of_shards" : 1,
+		"number_of_replicas" : 0
+	},
+	"mappings" : {
+		"tweets": {
+			"properties" : {
+				"timestamp" : {
+					"type" : "date",
+					"format" : "epoch_millis"
+				}
+			}
+		},
+		"rss" : {
+			"properties" : {
+				"timestamp" : {
+					"type" : "date",
+					"format" : "epoch_millis"
+				}
+			}
+		}
+	}
+}
