@@ -1,10 +1,20 @@
 #! /bin/sh
 
+# Most used actions for InnoNews management
+# author : Stephane Kattoor
+
 ES_SERVER='localhost'
 ES_API="http://${ES_SERVER}:9200"
 ES_PIDFILE="/tmp/elastic.pid"
 
 INDEX=news
+
+HOMEDIR=/home/skattoor/InnoNews
+RSS=${HOMEDIR}/rss
+ATOM=${HOMEDIR}/atom
+WWW_IMPORTED=${HOMEDIR}/websitesImported
+DEBUG=${HOMEDIR}/debug
+TMP_DIRS="RSS ATOM WWW_IMPORTED DEBUG"
 
 echo "Using ES API :" $ES_API
 echo
@@ -12,14 +22,35 @@ echo
 # curl -XGET $ES_API/_cat?pretty
 case "$1" in
 	setup)
-		# Will install default mapping #HELP
+		# Installs default mapping and create directories #HELP
 		echo "Installing default mapping"
 		curl -XPUT $ES_API/_template/news_template_1?pretty -d @news-template.json
+		for i in ${TMP_DIRS}
+		do
+			echo Creating $i
+			if mkdir ${!i}
+			then
+				echo Successully created ${!i}
+			else
+				echo Failed to create ${!i}, check yourself
+			fi
+		done
 		;;
 	cleanup)
-		# Will drop indices #HELP
+		# Drops indices, empty directories holding automatically created contents #HELP
 		echo "Dropping indices"
 		curl -XDELETE ${ES_API}/${INDEX}'*'?pretty
+		echo "Cleaning up directories"
+		for i in ${TMP_DIRS}
+		do
+			echo Purging $i
+			if rm -f ${!i}/*
+			then
+				echo Successully purged ${!i}
+			else
+				echo Failed to purge ${!i}, check yourself
+			fi
+		done
 		;;
 	startES)
 		# Starts local Elasticsearch node #HELP
@@ -59,8 +90,12 @@ case "$1" in
 		fi
 		;;
 	status)
-		# shows status of Elasticsearch, Kibana, NiFi #HELP
+		# Shows status of Elasticsearch, Kibana, NiFi #HELP
 		ps waux | grep -Ei 'elastic|node|nifi' --color='auto'
+		;;
+	statusES)
+		# Shows ES indices #HELP
+		curl -XGET ${ES_API}/_cat/indices
 		;;
 	*|help)
 		# Prints this help #HELP

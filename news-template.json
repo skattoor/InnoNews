@@ -5,7 +5,7 @@
 		"number_of_replicas" : 0
 	},
 	"mappings" : {
-		"tweets": {
+		"_default_" : {
 			"properties" : {
 				"timestamp" : {
 					"type" : "date",
@@ -13,11 +13,24 @@
 				}
 			}
 		},
+		"tweets": {
+			"properties" : {
+				"userName" : {
+					"type" : "keyword"
+				},
+				"text" : {
+					"type" : "text"
+				},
+				"coordinates" : {
+					"type" : "geo_point"
+				}
+			}
+		},
 		"rss" : {
 			"properties" : {
-				"timestamp" : {
-					"type" : "date",
-					"format" : "epoch_millis"
+				"description" : {
+					"type" : "text",
+					"fielddata" : true
 				}
 			}
 		}
