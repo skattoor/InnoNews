@@ -44,7 +44,7 @@ case "$1" in
 		for i in ${TMP_DIRS}
 		do
 			echo Purging $i
-			if rm -f ${!i}/*
+			if find ${!i} -type f -print0 | xargs -0 rm -f
 			then
 				echo Successully purged ${!i}
 			else

@@ -2,7 +2,23 @@
 	"template" : "news-*",
 	"settings": {
 		"number_of_shards" : 1,
-		"number_of_replicas" : 0
+		"number_of_replicas" : 0,
+		"analysis" : {
+			"filter" : {
+				"my_stop" : {
+					"type" : "stop",
+					"stopwords" : [ "_english_", "_french_" ]
+				}
+			},
+			"analyzer" : {
+				"html_text" : {
+					"type" : "custom",
+					"char_filter" : "html_strip",
+					"tokenizer" : "standard",
+					"filter" : [ "asciifolding", "lowercase", "my_stop" ]
+				}
+			}
+		}
 	},
 	"mappings" : {
 		"_default_" : {
@@ -19,18 +35,20 @@
 					"type" : "keyword"
 				},
 				"text" : {
-					"type" : "text"
+					"type" : "text",
+					"fielddata" : true
 				},
 				"coordinates" : {
 					"type" : "geo_point"
 				}
 			}
 		},
-		"rss" : {
+		"rssItems" : {
 			"properties" : {
 				"description" : {
 					"type" : "text",
-					"fielddata" : true
+					"fielddata" : true,
+					"analyzer" : "html_text"
 				}
 			}
 		}
