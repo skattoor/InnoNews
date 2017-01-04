@@ -32,7 +32,8 @@
 		"tweets": {
 			"properties" : {
 				"userName" : {
-					"type" : "keyword"
+					"type" : "keyword",
+					"index": true
 				},
 				"text" : {
 					"type" : "text",
@@ -40,6 +41,18 @@
 				},
 				"coordinates" : {
 					"type" : "geo_point"
+				},
+				"hashtags" : {
+					"type" : "text",
+					"index" : true,
+					"fielddata" : true
+				},
+				"userId" : {
+					"type" : "keyword",
+					"index" : false
+				},
+				"tweetId" : {
+					"type" : "keyword"
 				}
 			}
 		},

@@ -10,11 +10,11 @@ ES_PIDFILE="/tmp/elastic.pid"
 INDEX=news
 
 HOMEDIR=/home/skattoor/InnoNews
-RSS=${HOMEDIR}/rss
-ATOM=${HOMEDIR}/atom
-WWW_IMPORTED=${HOMEDIR}/websitesImported
+RSS=${HOMEDIR}/feeds/rss
+ATOM=${HOMEDIR}/feeds/atom
+FAILEDRSS=${HOMEDIR}/feeds/0failedRss
 DEBUG=${HOMEDIR}/debug
-TMP_DIRS="RSS ATOM WWW_IMPORTED DEBUG"
+TMP_DIRS="RSS ATOM DEBUG FAILEDRSS"
 
 echo "Using ES API :" $ES_API
 echo
@@ -39,7 +39,7 @@ case "$1" in
 	cleanup)
 		# Drops indices, empty directories holding automatically created contents #HELP
 		echo "Dropping indices"
-		curl -XDELETE ${ES_API}/${INDEX}'*'?pretty
+		curl -XDELETE ${ES_API}/.kibana,${INDEX}'*'?pretty
 		echo "Cleaning up directories"
 		for i in ${TMP_DIRS}
 		do
