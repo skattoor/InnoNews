@@ -17,6 +17,7 @@
 package org.apache.nifi.processors.innonews;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.*;
 
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.components.PropertyValue;
@@ -143,13 +144,32 @@ public class ParseRss extends AbstractProcessor {
 
 					try {
 						split = session.putAttribute(split, "title", entry.getTitle());
-						if (entry.getPublishedDate() != null) {	
-							split = session.putAttribute(split, "pubDate", String.valueOf(entry.getPublishedDate().getTime()));
+						if (entry.getUpdatedDate() != null) {	
+							split = session.putAttribute(split, "timestamp", String.valueOf(entry.getUpdatedDate().getTime()));
+						} else {
+							if (entry.getPublishedDate() != null) {	
+								split = session.putAttribute(split, "timestamp", String.valueOf(entry.getPublishedDate().getTime()));
+							}else {
+								getLogger().info("AAAA Didn't find any usable date was null {}", new Object[]{entry});
+								split = session.putAttribute(split, "timestamp", String.valueOf(0));
+							}
+						}	
+						if (entry.getContents() != null) {
+							List<SyndContent> contentList = entry.getContents();
+							getLogger().info("BBBBB got content");
+							if (contentList.get(0) != null) {
+								getLogger().info("BBBBB value was {}", new Object[]{contentList.get(0).getValue()});
+								split = session.putAttribute(split, "description", StringUtils.substring(contentList.get(0).getValue(), 0, 8196));
+							}
+						} else {
+							if (entry.getDescription() != null) {
+								getLogger().info("BBBBB got description {}", new Object[]{entry.getDescription()});
+								split = session.putAttribute(split, "description", StringUtils.substring(entry.getDescription().getValue(), 0, 8196));
+							} else {
+								getLogger().info("BBBBB no content, no description !");
+							}
 						}
-						if (entry.getDescription() != null) {
-							split = session.putAttribute(split, "description", entry.getDescription().getValue());
-						}
-						split = session.putAttribute(split, "link",entry.getUri());
+						split = session.putAttribute(split, "link",entry.getLink());
 						session.transfer(split, REL_ITEMS);
 					} catch (Exception e) {
 						getLogger().info("Something bad happened with this feed item {}. Throwing it away {}", new Object[]{entry, e});

@@ -1,7 +1,7 @@
 {
 	"template" : "news-*",
 	"settings": {
-		"number_of_shards" : 1,
+		"number_of_shards" : 5,
 		"number_of_replicas" : 0,
 		"analysis" : {
 			"filter" : {
@@ -25,7 +25,7 @@
 			"properties" : {
 				"timestamp" : {
 					"type" : "date",
-					"format" : "epoch_millis"
+					"format" : "epoch_millis||date_time"
 				}
 			}
 		},
@@ -37,15 +37,15 @@
 				},
 				"text" : {
 					"type" : "text",
-					"fielddata" : true
+					"fielddata" : true,
+					"analyzer" : "html_text"
 				},
 				"coordinates" : {
 					"type" : "geo_point"
 				},
 				"hashtags" : {
-					"type" : "text",
-					"index" : true,
-					"fielddata" : true
+					"type" : "keyword",
+					"index" : true
 				},
 				"userId" : {
 					"type" : "keyword",
@@ -59,6 +59,27 @@
 		"rssItems" : {
 			"properties" : {
 				"description" : {
+					"type" : "text",
+					"fielddata" : true,
+					"analyzer" : "html_text"
+				},
+				"tag" : {
+					"type" : "keyword",
+					"index" : "true"
+				}
+			}
+		},
+		"emails" : {
+			"properties" : {
+				"subject" : {
+					"type" : "text",
+					"analyzer" : "html_text"
+				},
+				"from" : {
+					"type" : "keyword",
+					"index" : "true"
+				},
+				"message" : {
 					"type" : "text",
 					"fielddata" : true,
 					"analyzer" : "html_text"

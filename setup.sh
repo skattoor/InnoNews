@@ -10,11 +10,10 @@ ES_PIDFILE="/tmp/elastic.pid"
 INDEX=news
 
 HOMEDIR=/home/skattoor/InnoNews
-RSS=${HOMEDIR}/feeds/rss
-ATOM=${HOMEDIR}/feeds/atom
-FAILEDRSS=${HOMEDIR}/feeds/0failedRss
+FEEDS=${HOMEDIR}/feeds
+EMAILS=${HOMEDIR}/emails
 DEBUG=${HOMEDIR}/debug
-TMP_DIRS="RSS ATOM DEBUG FAILEDRSS"
+TMP_DIRS="FEEDS DEBUG EMAILS"
 
 echo "Using ES API :" $ES_API
 echo
@@ -32,23 +31,23 @@ case "$1" in
 			then
 				echo Successully created ${!i}
 			else
-				echo Failed to create ${!i}, check yourself
+				echo Failed to create ${!i}, check by yourself
 			fi
 		done
 		;;
 	cleanup)
-		# Drops indices, empty directories holding automatically created contents #HELP
+		# Drops indices, empty directories (except if file is prefixed by manual- #HELP
 		echo "Dropping indices"
-		curl -XDELETE ${ES_API}/.kibana,${INDEX}'*'?pretty
+		curl -XDELETE ${ES_API}/${INDEX}'*'?pretty
 		echo "Cleaning up directories"
 		for i in ${TMP_DIRS}
 		do
 			echo Purging $i
-			if find ${!i} -type f -print0 | xargs -0 rm -f
+			if find ${!i} -type f -not -name "manual*" -print0 | xargs -0 rm -f
 			then
 				echo Successully purged ${!i}
 			else
-				echo Failed to purge ${!i}, check yourself
+				echo Failed to purge ${!i}, check by yourself
 			fi
 		done
 		;;
