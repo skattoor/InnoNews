@@ -12,8 +12,10 @@ INDEX=news
 HOMEDIR=/home/skattoor/InnoNews
 FEEDS=${HOMEDIR}/feeds
 EMAILS=${HOMEDIR}/emails
+EMAILBODIES=${HOMEDIR}/emailBodies
 DEBUG=${HOMEDIR}/debug
 TMP_DIRS="FEEDS DEBUG EMAILS"
+ALL_DIRS="${TMP_DIRS} EMAILBODIES"
 
 echo "Using ES API :" $ES_API
 echo
@@ -24,7 +26,7 @@ case "$1" in
 		# Installs default mapping and create directories #HELP
 		echo "Installing default mapping"
 		curl -XPUT $ES_API/_template/news_template_1?pretty -d @news-template.json
-		for i in ${TMP_DIRS}
+		for i in ${ALL_DIRS}
 		do
 			echo Creating $i
 			if mkdir ${!i}

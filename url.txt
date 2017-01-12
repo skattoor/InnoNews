@@ -33,6 +33,6 @@ schneier,https://www.schneier.com/
 elasticCo,https://www.elastic.co/blog
 MariaDB,https://mariadb.com/resources/blog
 redhat,https://www.redhat.com/fr/about/blog
-r/linux,https://www.reddit.com/r/linux/top/.rss?sort=top&t=week
-r/aws,https://www.reddit.com/r/aws/top/.rss?sort=top&t=week
-r/bigdata,https://www.reddit.com/r/bigdata/top/.rss?sort=top&t=week
+r/linux,https://www.reddit.com/r/linux/top/?sort=top&t=week
+r/aws,https://www.reddit.com/r/aws/top/?sort=top&t=week
+r/bigdata,https://www.reddit.com/r/bigdata/top/?sort=top&t=week
