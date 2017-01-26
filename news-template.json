@@ -27,7 +27,19 @@
 					"type" : "date",
 					"format" : "epoch_millis||date_time"
 				}
-			}
+			},
+			"dynamic_templates" : [
+				{
+					"strings" : {
+						"match_mapping_type" : "string",
+						"mapping" : {
+							"type" : "keyword",
+							"index" : false,
+							"fielddata" : false
+						}
+					}
+				}
+			]
 		},
 		"tweets": {
 			"properties" : {

@@ -6,10 +6,18 @@
 ES_SERVER='localhost'
 ES_API="http://${ES_SERVER}:9200"
 ES_PIDFILE="/tmp/elastic.pid"
+ES_INDEX=news
 
-INDEX=news
+KIBANA_PIDFILE="/tmp/kibana.pid"
+KIBANA_LOG="/home/data/elk/logs/kibana/kibana.log"
+KIBANA_ERR="/home/data/elk/logs/kibana/kibana.err"
 
-HOMEDIR=/home/skattoor/InnoNews
+LOGSTASH_PIDFILE="/tmp/logstash.pid"
+LOGSTASH_LOG="/home/data/elk/logs/logstash/logstash.log"
+LOGSTASH_ERR="/home/data/elk/logs/logstash/logstash.err"
+
+
+HOMEDIR=/home/data/elk/data/innonews
 FEEDS=${HOMEDIR}/feeds
 EMAILS=${HOMEDIR}/emails
 EMAILBODIES=${HOMEDIR}/emailBodies
@@ -19,6 +27,34 @@ ALL_DIRS="${TMP_DIRS} EMAILBODIES"
 
 echo "Using ES API :" $ES_API
 echo
+
+stopDaemon() {
+	soft=$1
+	pidfile=$2
+
+	echo "Stopping $soft"
+	if [ -r $pidfile ]
+	then
+		sudo kill -TERM `cat $pidfile`
+		i=0
+		while [ -d /proc/`cat $pidfile` -a \( $i -lt 10 \) ]
+		do
+			echo "Waiting for $soft to stop..."
+			i=`expr $i + 1`
+			sleep 1
+		done
+		if [ -d /proc/`cat $pidfile` ]
+		then
+			echo "Failed : $soft didn't stop in a timely manner"
+			ls -l $pidfile
+			exit 1
+		else
+			echo Success
+		fi
+	else
+		echo "Failed : No PIDFILE in $pidfile."
+	fi
+}
 
 # curl -XGET $ES_API/_cat?pretty
 case "$1" in
@@ -38,9 +74,12 @@ case "$1" in
 		done
 		;;
 	cleanup)
-		# Drops indices, empty directories (except if file is prefixed by manual- #HELP
+		# Drops indices, empty directories (except if file is prefixed by manual-) #HELP
+		# ATTENTION : Use it and you WILL lose data #HELP
+		# "Now I am become Death, the destroyer of worlds"
+		
 		echo "Dropping indices"
-		curl -XDELETE ${ES_API}/${INDEX}'*'?pretty
+		curl -XDELETE ${ES_API}/${ES_INDEX}'*'?pretty
 		echo "Cleaning up directories"
 		for i in ${TMP_DIRS}
 		do
@@ -67,28 +106,48 @@ case "$1" in
 		;;
 	stopES)
 		# Stops local Elasticsearch node #HELP
-		echo "Stopping Elasticsearch"
-		if [ -r ${ES_PIDFILE} ]
-		then
-			sudo kill -TERM `cat ${ES_PIDFILE}`
-			i=0
-			while [ -e ${ES_PIDFILE} -a \( $i -lt 10 \) ]
-			do
-				echo "Waiting for Elasticsearch to stop..."
-				i=`expr $i + 1`
-				sleep 1
-			done
-			if [ -e ${ES_PIDFILE} ]
-			then
-				echo "Failed : Didn't stop in a timely manner"
-				ls -l ${ES_PIDFILE}
-				exit 1
-			else
-				echo Success
-			fi
-		else
-			echo "Failed : No PIDFILE in ${ES_PIDFILE}."
-		fi
+		stopDaemon "Elasticsearch" ${ES_PIDFILE}
+		;;
+	
+	startNiFi)
+		# Starts NiFi #HELP
+		/opt/nifi/bin/nifi.sh start
+		;;
+	stopNiFi)
+		# Stops NiFi #HELP
+		/opt/nifi/bin/nifi.sh stop
+		;;
+	startLogstash)
+		# Starts Logstash #HELP
+		nohup /opt/logstash/bin/logstash -f /home/data/elk/config/logstash/ >> $LOGSTASH_LOG 2>> $LOGSTASH_ERR &
+		echo $! > ${LOGSTASH_PIDFILE}
+		;;
+	stopLogstash)
+		# Stops Logstash #HELP
+		stopDaemon "Logstash" ${LOGSTASH_PIDFILE}
+		;;
+	startKibana)
+		# Starts Kibana #HELP
+		nohup /opt/kibana/bin/kibana -c /home/data/elk/config/kibana/kibana.yml >> $KIBANA_LOG 2>> $KIBANA_ERR &
+		echo $! > ${KIBANA_PIDFILE}
+		;;
+	stopKibana)
+		# Stops Kibana #HELP
+		stopDaemon "Kibana" ${KIBANA_PIDFILE}
+		;;
+	start)
+		# Starts the whole stack #HELP
+		startES
+		startKibana
+		startNiFi
+		startLogstash
+		;;
+	stop)
+		# Stops the whole stack #HELP
+		stopLogstash
+		stopNiFi
+		stopKibana
+		stopES
 		;;
 	status)
 		# Shows status of Elasticsearch, Kibana, NiFi #HELP
@@ -101,6 +160,6 @@ case "$1" in
 	*|help)
 		# Prints this help #HELP
 		echo "Use one of the following actions :"
-		cat $0 | grep -E ')|#HELP' | sed -e 's/)$/:/' -e 's/#HELP//' -e 's/# //' | grep -Fv 's/#HELP//'
+		cat $0 | grep -E '[a-zA-Z]\)|#HELP' | sed -e 's/)$/:/' -e 's/#HELP//' -e 's/# //' | grep -Fv 's/#HELP//'
 		;;
 esac
