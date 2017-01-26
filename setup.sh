@@ -31,7 +31,7 @@ ALL_DIRS="${TMP_DIRS} EMAILBODIES WEBSITETOIMPORT"
 echo "Using ES API :" $ES_API
 echo
 
-if [ X`hostname` -eq Xsakana ]; 
+if [ X`hostname` = Xsakana ]; 
 then
 	HOMEDIR=/home/skattoor/InnoNews
 	KIBANA_LOG="${HOMEDIR}/logs/kibana/kibana.log"
