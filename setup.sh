@@ -11,12 +11,14 @@ ES_INDEX=news
 KIBANA_PIDFILE="/tmp/kibana.pid"
 KIBANA_LOG="/home/data/elk/logs/kibana/kibana.log"
 KIBANA_ERR="/home/data/elk/logs/kibana/kibana.err"
+KIBANA_CONFIG="/home/data/elk/config/kibana/kibana.yml"
 
 LOGSTASH_PIDFILE="/tmp/logstash.pid"
 LOGSTASH_LOG="/home/data/elk/logs/logstash/logstash.log"
 LOGSTASH_ERR="/home/data/elk/logs/logstash/logstash.err"
+LOGSTASH_CONFIG="/home/data/elk/config/logstash/"
 
-
+# HOMEDIR=/home/skattoor/InnoNews
 HOMEDIR=/home/data/elk/data/innonews
 FEEDS=${HOMEDIR}/feeds
 EMAILS=${HOMEDIR}/emails
@@ -110,7 +112,6 @@ case "$1" in
 		# Stops local Elasticsearch node #HELP
 		stopDaemon "Elasticsearch" ${ES_PIDFILE}
 		;;
-	
 	startNiFi)
 		# Starts NiFi #HELP
 		/opt/nifi/bin/nifi.sh start
@@ -121,7 +122,7 @@ case "$1" in
 		;;
 	startLogstash)
 		# Starts Logstash #HELP
-		nohup /opt/logstash/bin/logstash -f /home/data/elk/config/logstash/ >> $LOGSTASH_LOG 2>> $LOGSTASH_ERR &
+		nohup /opt/logstash/bin/logstash -f ${LOGSTASH_CONFIG} >> $LOGSTASH_LOG 2>> $LOGSTASH_ERR &
 		echo $! > ${LOGSTASH_PIDFILE}
 		;;
 	stopLogstash)
@@ -130,7 +131,7 @@ case "$1" in
 		;;
 	startKibana)
 		# Starts Kibana #HELP
-		nohup /opt/kibana/bin/kibana -c /home/data/elk/config/kibana/kibana.yml >> $KIBANA_LOG 2>> $KIBANA_ERR &
+		nohup /opt/kibana/bin/kibana -c ${KIBANA_CONFIG} >> $KIBANA_LOG 2>> $KIBANA_ERR &
 		echo $! > ${KIBANA_PIDFILE}
 		;;
 	stopKibana)
