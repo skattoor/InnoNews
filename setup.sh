@@ -18,7 +18,6 @@ LOGSTASH_LOG="/home/data/elk/logs/logstash/logstash.log"
 LOGSTASH_ERR="/home/data/elk/logs/logstash/logstash.err"
 LOGSTASH_CONFIG="/home/data/elk/config/logstash/"
 
-# HOMEDIR=/home/skattoor/InnoNews
 HOMEDIR=/home/data/elk/data/innonews
 FEEDS=${HOMEDIR}/feeds
 EMAILS=${HOMEDIR}/emails
@@ -31,6 +30,18 @@ ALL_DIRS="${TMP_DIRS} EMAILBODIES WEBSITETOIMPORT"
 
 echo "Using ES API :" $ES_API
 echo
+
+if [ X`hostname` -eq Xsakana ]; 
+then
+	HOMEDIR=/home/skattoor/InnoNews
+	KIBANA_LOG="${HOMEDIR}/logs/kibana/kibana.log"
+	KIBANA_ERR="${HOMEDIR}/logs/kibana/kibana.err"
+	KIBANA_CONFIG="/opt/kibana/config/kibana.yml"
+
+	LOGSTASH_LOG="${HOMEDIR}/logs/logstash/logstash.log"
+	LOGSTASH_ERR="${HOMEDIR}/logs/logstash/logstash.err"
+	LOGSTASH_CONFIG="/etc/logstash/"
+fi
 
 stopDaemon() {
 	soft=$1
